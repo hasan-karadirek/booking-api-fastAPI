@@ -3,8 +3,8 @@ from enum import Enum
 
 class UserType(str, Enum):
     CUSTOMER = "customer"
-    HOTEL_ADMIN = "hotel admin"
-    SYSTEM_ADMIN = "system admin"
+    HOTEL_ADMIN = "hotel_admin"
+    SYSTEM_ADMIN = "system_admin"
 
 class UserIn(BaseModel):
     name:str

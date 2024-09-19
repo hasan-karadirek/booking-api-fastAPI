@@ -11,7 +11,7 @@ def create_hotel(db:Session,request:HotelIn, current_hotel_admin: UserIn, image:
     with open(file_location, "wb") as buffer:
         shutil.copyfileobj(image.file, buffer)
 
-    hotel=DbHotel(name = request.name,address=request.address,city=request.city, tel=request.tel, image=file_location,user_id=1)
+    hotel=DbHotel(name = request.name,address=request.address,city=request.city, tel=request.tel, email=request.email, image=file_location,user_id=current_hotel_admin.id)
     db.add(hotel)
     db.commit()
     db.refresh(hotel)

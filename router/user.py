@@ -11,7 +11,7 @@ router=APIRouter(
 )
 
 @router.post("/create_user", response_model=UserOut)
-def create_user(request:UserIn, db : Session = Depends(get_db), current_user : UserIn = Depends(get_current_user)):
+def create_user(request:UserIn, db : Session = Depends(get_db)):
     return user.create_user(db, request)
 
 @router.get("/{id}", response_model=UserOut)

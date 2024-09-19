@@ -14,4 +14,4 @@ class DbHotel(Base):
     email=Column(String,nullable=False)
     image=Column(String,nullable=False)
     user_id = Column(Integer, ForeignKey('users.id'), nullable=False)
-    user = relationship("DbUser", back_populates="hotels")
+    user = relationship("DBUser", back_populates="hotels")
