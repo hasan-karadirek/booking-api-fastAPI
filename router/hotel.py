@@ -1,10 +1,10 @@
 from schemas.user import UserIn, UserType
 from sqlalchemy.orm import Session
-from crud import hotel
-from auth.oauth2 import get_current_user
+from crud import hotel as hotel_crud
+from auth.oauth2 import get_current_hotel_admin, get_create_room_permission
 from db.database import get_db
 from fastapi import Depends, APIRouter, UploadFile, File, HTTPException, status, Form
-from schemas.hotel import HotelIn
+from schemas.hotel import HotelIn, RoomIn
 
 router = APIRouter(prefix="/hotel", tags=["hotel"])
 
@@ -18,17 +18,30 @@ def create_hotel(
     email: str = Form(...),
     image: UploadFile = File(...),
     db: Session = Depends(get_db),
-    current_user: UserIn = Depends(get_current_user),
+    current_hotel_admin: UserIn = Depends(get_current_hotel_admin),
 ):
-    if current_user.type != UserType.HOTEL_ADMIN:
-        print(current_user.type, "hasan")
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="You do not have authorization to create a hotel.",
-        )
-    return hotel.create_hotel(
+
+    return hotel_crud.create_hotel(
         db=db,
         request=HotelIn(name=name, address=address, city=city, tel=tel, email=email),
-        current_hotel_admin=current_user,
+        current_hotel_admin=current_hotel_admin,
+        image=image,
+    )
+
+
+@router.post("/create_room")
+def create_room(
+    room_no: str = Form(...),
+    bed_count: int = Form(...),
+    price: float = Form(...),
+    image: UploadFile = File(...),
+    db: Session = Depends(get_db),
+    hotel: HotelIn = Depends(get_create_room_permission),
+):
+    return hotel_crud.create_room(
+        db=db,
+        request=RoomIn(
+            room_no=room_no, bed_count=bed_count, price=price, hotel_id=hotel.id
+        ),
         image=image,
     )

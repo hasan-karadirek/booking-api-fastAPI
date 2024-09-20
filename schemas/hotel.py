@@ -8,3 +8,10 @@ class HotelIn(BaseModel):
     city: str
     tel: str
     email: str
+
+
+class RoomIn(BaseModel):
+    room_no: str
+    bed_count: int
+    price: float
+    hotel_id: int

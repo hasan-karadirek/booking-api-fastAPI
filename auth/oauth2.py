@@ -6,6 +6,8 @@ from sqlalchemy.orm.session import Session
 from fastapi import Depends, HTTPException, status
 from db.database import get_db
 from crud.user import get_user_by_email
+from schemas.user import UserType
+from models.hotel import DbHotel
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
@@ -47,3 +49,33 @@ def get_current_user(
         raise credentials_exception
 
     return user
+
+
+def get_current_hotel_admin(
+    token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)
+):
+    user = get_current_user(token=token, db=db)
+    if user.type != UserType.HOTEL_ADMIN:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You do not have authorization to create a hotel.",
+        )
+    return user
+
+
+def get_create_room_permission(
+    hotel_id: int, token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)
+):
+    current_hotel_admin = get_current_hotel_admin(token=token, db=db)
+    hotel = db.query(DbHotel).filter(DbHotel.id == hotel_id).first()
+    if not hotel:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="There is no such a hotel associated with this id!",
+        )
+    if hotel.user_id != current_hotel_admin.id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You can not create rooms for this hotel.",
+        )
+    return hotel
