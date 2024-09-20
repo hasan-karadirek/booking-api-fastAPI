@@ -1,9 +1,9 @@
-from schemas.user import UserIn, UserType
+from schemas.user import UserIn
 from sqlalchemy.orm import Session
 from crud import hotel as hotel_crud
 from auth.oauth2 import get_current_hotel_admin, get_create_room_permission
 from db.database import get_db
-from fastapi import Depends, APIRouter, UploadFile, File, HTTPException, status, Form
+from fastapi import Depends, APIRouter, UploadFile, File, Form
 from schemas.hotel import HotelIn, RoomIn
 
 router = APIRouter(prefix="/hotel", tags=["hotel"])
@@ -28,6 +28,9 @@ def create_hotel(
         image=image,
     )
 
+@router.get("/{id}")
+def get_hotel(id : int, db: Session = Depends(get_db)):
+    return hotel_crud.get_hotel(id=id,db=db)
 
 @router.post("/create_room")
 def create_room(
@@ -45,3 +48,6 @@ def create_room(
         ),
         image=image,
     )
+@router.get("/room/{id}")
+def get_room(id : int, db: Session = Depends(get_db)):
+    return hotel_crud.get_room(id=id,db=db)

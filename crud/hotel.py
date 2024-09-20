@@ -31,6 +31,12 @@ def create_hotel(
 
     return hotel
 
+def get_hotel(id: int, db: Session):
+    hotel = db.query(DbHotel).filter(DbHotel.id == id).first()
+    if not hotel:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="There is no such a hotel associated with this id.!")
+    return hotel
+
 
 def create_room(db: Session, request: RoomIn, image: UploadFile = File(...)):
     file_location = f"uploaded_images/{image.filename}"
@@ -46,4 +52,10 @@ def create_room(db: Session, request: RoomIn, image: UploadFile = File(...)):
     db.add(room)
     db.commit()
     db.refresh(room)
+    return room
+
+def get_room(id: int, db: Session):
+    room = db.query(DbRoom).filter(DbRoom.id == id).first()
+    if not room:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="There is no such a room associated with this id!")
     return room
