@@ -21,3 +21,4 @@ class DBUser(Base):
     type = Column(sqlEnum(UserType), nullable=False, default="CUSTOMER")
 
     hotels = relationship("DbHotel", back_populates="user")
+    bookings = relationship("DbBooking", back_populates="user")

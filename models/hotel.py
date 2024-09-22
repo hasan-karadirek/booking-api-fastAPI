@@ -28,3 +28,4 @@ class DbRoom(Base):
     image = Column(String, nullable=False)
     hotel_id = Column(Integer, ForeignKey("hotels.id"), nullable=False)
     hotel = relationship("DbHotel", back_populates="rooms")
+    bookings = relationship("DbBookedRooms", back_populates="room")
