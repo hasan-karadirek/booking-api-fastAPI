@@ -4,6 +4,8 @@ from models.hotel import DbHotel, DbRoom
 from schemas.user import UserIn
 from schemas.hotel import HotelIn, RoomIn
 import shutil
+from schemas.hotel import HotelWithRoomsOut,GroupedRoomWithNos
+from sqlalchemy import func
 
 
 def create_hotel(
@@ -36,6 +38,47 @@ def get_hotel(id: int, db: Session):
     if not hotel:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="There is no such a hotel associated with this id.!")
     return hotel
+
+def get_hotel_with_rooms(id: int, db: Session):
+    hotel = db.query(DbHotel).filter(DbHotel.id == id).first()
+    if not hotel:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="There is no such a hotel associated with this id.")
+
+    # Group the rooms by price and bed_count and concatenate room numbers into a string
+    rooms = db.query(
+        func.group_concat(DbRoom.id, ',').label('room_ids'), 
+        DbRoom.price,
+        DbRoom.bed_count,
+        func.count(DbRoom.id).label('room_count')
+    ).filter(DbRoom.hotel_id == id) \
+    .group_by(DbRoom.price, DbRoom.bed_count) \
+    .all()
+
+    grouped_rooms = [
+        GroupedRoomWithNos(
+            room_ids=room.room_ids.split(','),  
+            price=room.price,
+            bed_count=room.bed_count,
+            room_count=room.room_count,
+            hotel_id=id
+        ) for room in rooms
+    ]
+
+    
+    hotel_response = HotelWithRoomsOut(
+        id=hotel.id,
+        name=hotel.name,
+        address=hotel.address,
+        city=hotel.city,
+        tel=hotel.tel,
+        email=hotel.email,
+        image=hotel.image,
+        grouped_rooms=grouped_rooms
+    )
+    
+    return hotel_response
+
+    
 
 
 def create_room(db: Session, request: RoomIn, image: UploadFile = File(...)):

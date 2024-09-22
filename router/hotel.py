@@ -4,7 +4,7 @@ from crud import hotel as hotel_crud
 from auth.oauth2 import get_current_hotel_admin, get_create_room_permission
 from db.database import get_db
 from fastapi import Depends, APIRouter, UploadFile, File, Form
-from schemas.hotel import HotelIn, RoomIn
+from schemas.hotel import HotelIn, RoomIn,HotelWithRoomsOut
 
 router = APIRouter(prefix="/hotel", tags=["hotel"])
 
@@ -31,6 +31,9 @@ def create_hotel(
 @router.get("/{id}")
 def get_hotel(id : int, db: Session = Depends(get_db)):
     return hotel_crud.get_hotel(id=id,db=db)
+@router.get("/{id}/rooms")
+def get_hotel_with_rooms(id : int, db: Session = Depends(get_db)):
+    return hotel_crud.get_hotel_with_rooms(id=id,db=db)
 
 @router.post("/create_room")
 def create_room(
